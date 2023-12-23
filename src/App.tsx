@@ -8,9 +8,9 @@ interface FormState {
   name: string;
   gender: string;
   age: string;
-  businessActivity: string;
+  businessContent: string;
   businessScale: string;
-  numberOfEmployees: string;
+  employeeNumber: string;
   businessStartDate: string;
 }
 
@@ -34,101 +34,146 @@ const App = () => {
 
   const [formState, setFormState] = useState<FormState>({
     name: '',
+    furigana: '',
     gender: '',
-    age: '',
-    businessActivity: '',
-    businessScale: '',
-    numberOfEmployees: '',
-    businessStartDate: ''
+    affiliation: '',
+    clubName: '',
+    source: '',
+    phoneNumber: '',
+    breakfastPreference: ''
   });
 
-  const handleTextInputChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const name = event.target.name;
-    const value = event.target.value;
+const handleTextInputChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const name = event.target.name;
+  const value = event.target.value;
 
-    if (typeof name === "string" && typeof value === "string") {
-      setFormState({
-        ...formState,
-        [name]: value
-      });
+  if (typeof name === "string" && typeof value === "string") {
+    setFormState({
+      ...formState,
+      [name]: value
+    });
+  }
+};
+
+const handleSelectInputChange = (event: SelectChangeEvent<string>) => {
+  const name = event.target.name;
+  const value = event.target.value;
+
+  if (typeof name === "string" && typeof value === "string") {
+    setFormState({
+      ...formState,
+      [name]: value
+    });
+  }
+};
+
+const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  event.preventDefault();
+  setErrors([]);  // Clear out previous errors
+
+  // Input validation
+  let tempErrors: string[] = [];
+  if (formState.name === '') {
+    tempErrors.push(`名前を入力してください。`);
+  }
+  if (formState.furigana === '') {
+    tempErrors.push(`ふりがなを入力してください。`);
+  }
+  if (formState.gender === '') {
+    tempErrors.push(`性別を選択してください。`);
+  }
+  if (formState.affiliation === '') {
+    tempErrors.push(`所属を選択してください。`);
+  }
+
+  setErrors(tempErrors);
+
+  // Send the form data to LINE bot via LIFF
+  if(tempErrors.length === 0 && liff.isLoggedIn()) {
+    try {
+      let message = [
+        `名前: ${formState.name}`,
+        `ふりがな: ${formState.furigana}`,
+        `性別: ${formState.gender}`,
+        `所属: ${formState.affiliation}`,
+        formState.clubName ? `単会名: ${formState.clubName}` : '',
+        formState.source ? `どのように知りましたか: ${formState.source}` : '',
+        formState.phoneNumber ? `電話番号: ${formState.phoneNumber}` : ''
+      ].filter(item => item !== '').join('\n');
+      
+      await liff.sendMessages([{
+        type: 'text',
+        text: "初回登録\n" + message
+      }]);
+      liff.closeWindow();
+    } catch (err) {
+      setErrors(errors => [...errors, 'フォームの送信中に問題が発生しました。もう一度試してください。']);
     }
-  };
+  }
+};
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setErrors([]); // Clear out previous errors
 
-    // Input validation
-    let tempErrors: string[] = [];
-    if (formState.name === '') {
-      tempErrors.push(`氏名を入力してください。`);
-    }
-
-    // Add additional validation as needed
-
-    setErrors(tempErrors);
-
-    // Send the form data to LINE bot via LIFF
-    if (tempErrors.length === 0 && liff.isLoggedIn()) {
-      try {
-        await liff.sendMessages([{
-          type: 'text',
-          text: "フォーム初回登録\n" + JSON.stringify(formState)
-        }]);
-        liff.closeWindow();
-      } catch (err) {
-        setErrors(errors => [...errors, 'フォームの送信中に問題が発生しました。もう一度試してください。']);
-      }
-    }
-  };
-
-  return (
-    <Container>
-      <form onSubmit={handleSubmit}>
-        <Grid container spacing={3}>
-          {/* 各フィールドの追加 */}
-          <Grid item xs={12}>
-            <Typography variant="h6" component="div">氏名</Typography>
-            <TextField name="name" onChange={handleTextInputChange} required fullWidth />
-          </Grid>
-          <Grid item xs={12}>
-            <Typography variant="h6" component="div">性別</Typography>
-            <TextField name="gender" onChange={handleTextInputChange} required fullWidth />
-          </Grid>
-          <Grid item xs={12}>
-            <Typography variant="h6" component="div">年齢</Typography>
-            <TextField name="age" onChange={handleTextInputChange} required fullWidth />
-          </Grid>
-          <Grid item xs={12}>
-            <Typography variant="h6" component="div">事業内容</Typography>
-            <TextField name="businessActivity" onChange={handleTextInputChange} required fullWidth />
-          </Grid>
-          <Grid item xs={12}>
-            <Typography variant="h6" component="div">事業規模 (年商/利益)</Typography>
-            <TextField name="businessScale" onChange={handleTextInputChange} required fullWidth />
-          </Grid>
-          <Grid item xs={12}>
-            <Typography variant="h6" component="div">従業員数</Typography>
-            <TextField name="numberOfEmployees" onChange={handleTextInputChange} required fullWidth />
-          </Grid>
-          <Grid item xs={12}>
-            <Typography variant="h6" component="div">事業開始時期</Typography>
-            <TextField name="businessStartDate" onChange={handleTextInputChange} required fullWidth />
-          </Grid>
-
-          <Grid item xs={12}>
-            <Button type="submit" variant="contained" color="primary" fullWidth>送信</Button>
-          </Grid>
+return (
+  <Container>
+    <form onSubmit={handleSubmit}>
+      <Grid container spacing={3}>
+        {/* 氏名 */}
+        <Grid item xs={12}>
+          <Typography variant="h6" component="div">氏名</Typography>
+          <TextField name="name" onChange={handleTextInputChange} required fullWidth />
         </Grid>
-      </form>
 
-      {errors.length > 0 && (
-        <ul>
-          {errors.map((error, index) => <li key={index}>{error}</li>)}
-        </ul>
-      )}
-    </Container>
-  );
+        {/* 性別 */}
+        <Grid item xs={12}>
+          <Typography variant="h6" component="div">性別</Typography>
+          <TextField name="gender" onChange={handleTextInputChange} required fullWidth />
+        </Grid>
+
+        {/* 年齢 */}
+        <Grid item xs={12}>
+          <Typography variant="h6" component="div">年齢</Typography>
+          <TextField name="age" onChange={handleTextInputChange} required fullWidth />
+        </Grid>
+
+        {/* 事業内容 */}
+        <Grid item xs={12}>
+          <Typography variant="h6" component="div">事業内容</Typography>
+          <TextField name="businessContent" onChange={handleTextInputChange} required fullWidth />
+        </Grid>
+
+        {/* 事業規模 */}
+        <Grid item xs={12}>
+          <Typography variant="h6" component="div">事業規模 (年商/利益)</Typography>
+          <TextField name="businessScale" onChange={handleTextInputChange} required fullWidth />
+        </Grid>
+
+        {/* 従業員数 */}
+        <Grid item xs={12}>
+          <Typography variant="h6" component="div">従業員数</Typography>
+          <TextField name="employeeNumber" onChange={handleTextInputChange} required fullWidth />
+        </Grid>
+
+        {/* 事業開始時期 */}
+        <Grid item xs={12}>
+          <Typography variant="h6" component="div">事業開始時期</Typography>
+          <TextField name="businessStartDate" onChange={handleTextInputChange} required fullWidth />
+        </Grid>
+
+        {/* 送信ボタン */}
+        <Grid item xs={12}>
+          <Button type="submit" variant="contained" color="primary" fullWidth>送信</Button>
+        </Grid>
+      </Grid>
+    </form>
+
+    {/* エラーメッセージ */}
+    {errors.length > 0 && (
+      <ul>
+        {errors.map((error, index) => <li key={index}>{error}</li>)}
+      </ul>
+    )}
+  </Container>
+);
 };
 
 export default App;
