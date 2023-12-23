@@ -34,13 +34,12 @@ const App = () => {
 
   const [formState, setFormState] = useState<FormState>({
     name: '',
-    furigana: '',
     gender: '',
-    affiliation: '',
-    clubName: '',
-    source: '',
-    phoneNumber: '',
-    breakfastPreference: ''
+    age: '',
+    businessContent: '',
+    businessScale: '',
+    employeeNumber: '',
+    businessStartDate: ''
   });
 
 const handleTextInputChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -72,33 +71,42 @@ const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
   setErrors([]);  // Clear out previous errors
 
   // Input validation
+  // 入力検証
   let tempErrors: string[] = [];
   if (formState.name === '') {
     tempErrors.push(`名前を入力してください。`);
   }
-  if (formState.furigana === '') {
-    tempErrors.push(`ふりがなを入力してください。`);
-  }
   if (formState.gender === '') {
-    tempErrors.push(`性別を選択してください。`);
+    tempErrors.push(`性別を入力してください。`);
   }
-  if (formState.affiliation === '') {
-    tempErrors.push(`所属を選択してください。`);
+  if (formState.age === '') {
+    tempErrors.push(`年齢を入力してください。`);
+  }
+  if (formState.businessContent === '') {
+    tempErrors.push(`事業内容を入力してください。`);
+  }
+  if (formState.businessScale === '') {
+    tempErrors.push(`事業規模を入力してください。`);
+  }
+  if (formState.employeeNumber === '') {
+    tempErrors.push(`従業員数を入力してください。`);
+  }
+  if (formState.businessStartDate === '') {
+    tempErrors.push(`事業開始時期を入力してください。`);
   }
 
-  setErrors(tempErrors);
 
   // Send the form data to LINE bot via LIFF
   if(tempErrors.length === 0 && liff.isLoggedIn()) {
     try {
       let message = [
         `名前: ${formState.name}`,
-        `ふりがな: ${formState.furigana}`,
         `性別: ${formState.gender}`,
-        `所属: ${formState.affiliation}`,
-        formState.clubName ? `単会名: ${formState.clubName}` : '',
-        formState.source ? `どのように知りましたか: ${formState.source}` : '',
-        formState.phoneNumber ? `電話番号: ${formState.phoneNumber}` : ''
+        `年齢: ${formState.age}`,
+        `事業内容: ${formState.businessContent}`,
+        `事業規模: ${formState.businessScale}`,
+        `従業員数: ${formState.employeeNumber}`,
+        `事業開始時期: ${formState.businessStartDate}`
       ].filter(item => item !== '').join('\n');
       
       await liff.sendMessages([{
