@@ -84,40 +84,25 @@ const App = () => {
       return;
     }
   
-    // 送信するメッセージを作成
-    let messageText = `プロフィール登録\n`;
-    messageText += `呼んでほしい名前: ${formState.nickname}\n`;
-    messageText += `現状: ${formState.currentStatus}\n`;
-  
-    // 各項目が空白でない場合のみメッセージに追加
-    if (formState.businessContent) {
-      messageText += `事業内容: ${formState.businessContent}\n`;
-    }
-    if (formState.annualRevenue) {
-      messageText += `年商: ${formState.annualRevenue}\n`;
-    }
-    if (formState.employeeNumber) {
-      messageText += `従業員数: ${formState.employeeNumber}\n`;
-    }
-    if (formState.businessStartDate) {
-      messageText += `開業時期: ${formState.businessStartDate}\n`;
-    }
-    if (formState.mainJobIncome) {
-      messageText += `本業収入: ${formState.mainJobIncome}\n`;
-    }
-    if (formState.occupation) {
-      messageText += `職業: ${formState.occupation}\n`;
-    }
-    if (formState.annualIncome) {
-      messageText += `年収: ${formState.annualIncome}\n`;
-    }
-    if (formState.specialSkill) {
-      messageText += `得意（特異）なこと: ${formState.specialSkill}\n`;
-    }
+  // 送信するメッセージを作成
+  let messageText = `プロフィール登録`;
 
-    if (messageText.endsWith("\n")) {
-      messageText = messageText.slice(0, -1);
+  const addItem = (label: string, value: string | undefined) => {
+    if (value) {
+      messageText += `\n${label}: ${value}`;
     }
+  };
+
+  addItem("呼んでほしい名前", formState.nickname);
+  addItem("現状", formState.currentStatus);
+  addItem("事業内容", formState.businessContent);
+  addItem("年商", formState.annualRevenue);
+  addItem("従業員数", formState.employeeNumber);
+  addItem("開業時期", formState.businessStartDate);
+  addItem("本業収入", formState.mainJobIncome);
+  addItem("職業", formState.occupation);
+  addItem("年収", formState.annualIncome);
+  addItem("得意（特異）なこと", formState.specialSkill);
   
     const messageData = {
       type: 'text' as const,
