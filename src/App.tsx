@@ -77,8 +77,7 @@ const App = () => {
     if (!formState.currentStatus) {
       errorMessages.push("現状を選択してください。");
     }
-    // 他の必須フィールドに対するバリデーションもここに追加
-  
+    
     // エラーがある場合は処理を中断
     if (errorMessages.length > 0) {
       alert(errorMessages.join('\n'));
@@ -113,7 +112,7 @@ const App = () => {
       messageText += `年収: ${formState.annualIncome}\n`;
     }
     if (formState.specialSkill) {
-      messageText += `得意（特異）なこと: ${formState.specialSkill}`;
+      messageText += `得意（特異）なこと: ${formState.specialSkill}\n`;
     }
   
     const messageData = {
@@ -135,6 +134,7 @@ const App = () => {
     // LIFFウィンドウを閉じる
     liff.closeWindow();
   };
+  
 
 
 return (
