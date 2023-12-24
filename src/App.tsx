@@ -86,13 +86,39 @@ const App = () => {
     }
   
     // 送信するメッセージを作成
+    let messageText = `プロフィール登録\n`;
+    messageText += `呼んでほしい名前: ${formState.nickname}\n`;
+    messageText += `現状: ${formState.currentStatus}\n`;
+  
+    // 各項目が空白でない場合のみメッセージに追加
+    if (formState.businessContent) {
+      messageText += `事業内容: ${formState.businessContent}\n`;
+    }
+    if (formState.annualRevenue) {
+      messageText += `年商: ${formState.annualRevenue}\n`;
+    }
+    if (formState.employeeNumber) {
+      messageText += `従業員数: ${formState.employeeNumber}\n`;
+    }
+    if (formState.businessStartDate) {
+      messageText += `開業時期: ${formState.businessStartDate}\n`;
+    }
+    if (formState.mainJobIncome) {
+      messageText += `本業収入: ${formState.mainJobIncome}\n`;
+    }
+    if (formState.occupation) {
+      messageText += `職業: ${formState.occupation}\n`;
+    }
+    if (formState.annualIncome) {
+      messageText += `年収: ${formState.annualIncome}\n`;
+    }
+    if (formState.specialSkill) {
+      messageText += `得意（特異）なこと: ${formState.specialSkill}`;
+    }
+  
     const messageData = {
       type: 'text' as const,
-      text: `プロフィール登録\n呼んでほしい名前: ${formState.nickname}\n現状: ${formState.currentStatus}\n` +
-            `事業内容: ${formState.businessContent || ''}\n年商: ${formState.annualRevenue || ''}\n` +
-            `従業員数: ${formState.employeeNumber || ''}\n開業時期: ${formState.businessStartDate || ''}\n` +
-            `本業収入: ${formState.mainJobIncome || ''}\n職業: ${formState.occupation || ''}\n` +
-            `年収: ${formState.annualIncome || ''}\n得意（特異）なこと: ${formState.specialSkill || ''}`
+      text: messageText
     };
   
     // LINEにメッセージを送信
