@@ -99,7 +99,6 @@ const App = () => {
     try {
       if (liff.isLoggedIn()) {
         await liff.sendMessages([messageData]);
-        alert("メッセージを送信しました。");
       } else {
         alert("LINEにログインしていません。");
       }
