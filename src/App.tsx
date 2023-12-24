@@ -100,7 +100,7 @@ const App = () => {
   addItem("従業員数", formState.employeeNumber);
   addItem("開業時期", formState.businessStartDate);
   addItem("本業収入", formState.mainJobIncome);
-  addItem("職業", formState.occupation);
+  addItem("職種", formState.occupation);
   addItem("年収", formState.annualIncome);
   addItem("得意（特異）なこと", formState.specialSkill);
   
@@ -283,7 +283,7 @@ return (
             <Grid item xs={12}>
               <TextField
                 name="occupation"
-                label="職業"
+                label="職種"
                 value={formState.occupation}
                 onChange={handleTextInputChange}
                 required
