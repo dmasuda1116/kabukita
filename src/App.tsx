@@ -114,6 +114,10 @@ const App = () => {
     if (formState.specialSkill) {
       messageText += `得意（特異）なこと: ${formState.specialSkill}\n`;
     }
+
+    if (messageText.endsWith("\n")) {
+      messageText = messageText.slice(0, -1);
+    }
   
     const messageData = {
       type: 'text' as const,
