@@ -1,17 +1,24 @@
 import React, { useEffect, useState, ChangeEvent } from "react";
-import { Box, Button, Container, FormControl, FormControlLabel, FormLabel, InputLabel, ListItem, List, MenuItem, Radio, RadioGroup, Select, TextField, Grid, Typography } from "@mui/material";
+import {
+  Box, Button, Container, FormControl, FormControlLabel, FormLabel,
+  InputLabel, ListItem, List, MenuItem, Radio, RadioGroup, Select,
+  TextField, Grid, Typography
+} from "@mui/material";
 import liff from "@line/liff";
 import "./App.css";
 import { SelectChangeEvent } from '@mui/material/Select';
 
 interface FormState {
-  name: string;
-  gender: string;
-  age: string;
-  businessContent: string;
-  businessScale: string;
-  employeeNumber: string;
-  businessStartDate: string;
+  nickname: string;
+  currentStatus: string;
+  businessContent?: string;
+  annualRevenue?: string;
+  employeeNumber?: string;
+  businessStartDate?: string;
+  mainJobIncome?: string;
+  occupation?: string;
+  annualIncome?: string;
+  specialSkill?: string;
 }
 
 const App = () => {
@@ -20,9 +27,7 @@ const App = () => {
 
   useEffect(() => {
     liff
-      .init({
-        liffId: import.meta.env.VITE_LIFF_ID
-      })
+      .init({ liffId: import.meta.env.VITE_LIFF_ID })
       .then(() => {
         setMessage("LIFFの初期化が成功しました。");
       })
@@ -33,153 +38,285 @@ const App = () => {
   }, []);
 
   const [formState, setFormState] = useState<FormState>({
-    name: '',
-    gender: '',
-    age: '',
-    businessContent: '',
-    businessScale: '',
-    employeeNumber: '',
-    businessStartDate: ''
+    nickname: '',
+    currentStatus: '',
   });
 
-const handleTextInputChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-  const name = event.target.name;
-  const value = event.target.value;
+  const handleTextInputChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const name = event.target.name;
+    const value = event.target.value;
 
-  if (typeof name === "string" && typeof value === "string") {
-    setFormState({
-      ...formState,
-      [name]: value
-    });
-  }
-};
-
-const handleSelectInputChange = (event: SelectChangeEvent<string>) => {
-  const name = event.target.name;
-  const value = event.target.value;
-
-  if (typeof name === "string" && typeof value === "string") {
-    setFormState({
-      ...formState,
-      [name]: value
-    });
-  }
-};
-
-const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-  event.preventDefault();
-  setErrors([]);  // Clear out previous errors
-
-  // Input validation
-  // 入力検証
-  let tempErrors: string[] = [];
-  if (formState.name === '') {
-    tempErrors.push(`名前を入力してください。`);
-  }
-  if (formState.gender === '') {
-    tempErrors.push(`性別を入力してください。`);
-  }
-  if (formState.age === '') {
-    tempErrors.push(`年齢を入力してください。`);
-  }
-  if (formState.businessContent === '') {
-    tempErrors.push(`事業内容を入力してください。`);
-  }
-  if (formState.businessScale === '') {
-    tempErrors.push(`事業規模を入力してください。`);
-  }
-  if (formState.employeeNumber === '') {
-    tempErrors.push(`従業員数を入力してください。`);
-  }
-  if (formState.businessStartDate === '') {
-    tempErrors.push(`事業開始時期を入力してください。`);
-  }
-
-
-  // Send the form data to LINE bot via LIFF
-  if(tempErrors.length === 0 && liff.isLoggedIn()) {
-    try {
-      let message = [
-        `名前: ${formState.name}`,
-        `性別: ${formState.gender}`,
-        `年齢: ${formState.age}`,
-        `事業内容: ${formState.businessContent}`,
-        `事業規模: ${formState.businessScale}`,
-        `従業員数: ${formState.employeeNumber}`,
-        `事業開始時期: ${formState.businessStartDate}`
-      ].filter(item => item !== '').join('\n');
-      
-      await liff.sendMessages([{
-        type: 'text',
-        text: "プロフィール登録\n" + message
-      }]);
-      liff.closeWindow();
-    } catch (err) {
-      setErrors(errors => [...errors, 'フォームの送信中に問題が発生しました。もう一度試してください。']);
+    if (typeof name === "string" && typeof value === "string") {
+      setFormState({
+        ...formState,
+        [name]: value
+      });
     }
-  }
-};
+  };
+
+  const handleSelectInputChange = (event: SelectChangeEvent<string>) => {
+    const name = event.target.name;
+    const value = event.target.value;
+
+    if (typeof name === "string" && typeof value === "string") {
+      setFormState({
+        ...formState,
+        [name]: value
+      });
+    }
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+  
+    // エラーチェック
+    let errorMessages: string[] = [];
+    if (!formState.nickname) {
+      errorMessages.push("呼んでほしい名前を入力してください。");
+    }
+    if (!formState.currentStatus) {
+      errorMessages.push("現状を選択してください。");
+    }
+    // 他の必須フィールドに対するバリデーションもここに追加
+  
+    // エラーがある場合は処理を中断
+    if (errorMessages.length > 0) {
+      alert(errorMessages.join('\n'));
+      return;
+    }
+  
+    // 送信するメッセージを作成
+    const messageData = {
+      type: 'text' as const,
+      text: `プロフィール登録\n呼んでほしい名前: ${formState.nickname}\n現状: ${formState.currentStatus}\n` +
+            `事業内容: ${formState.businessContent || ''}\n年商: ${formState.annualRevenue || ''}\n` +
+            `従業員数: ${formState.employeeNumber || ''}\n開業時期: ${formState.businessStartDate || ''}\n` +
+            `本業収入: ${formState.mainJobIncome || ''}\n職業: ${formState.occupation || ''}\n` +
+            `年収: ${formState.annualIncome || ''}\n得意（特異）なこと: ${formState.specialSkill || ''}`
+    };
+  
+    // LINEにメッセージを送信
+    try {
+      if (liff.isLoggedIn()) {
+        await liff.sendMessages([messageData]);
+        alert("メッセージを送信しました。");
+      } else {
+        alert("LINEにログインしていません。");
+      }
+    } catch (error) {
+      alert(`メッセージの送信に失敗しました: ${error}`);
+    }
+  
+    // LIFFウィンドウを閉じる
+    liff.closeWindow();
+  };
 
 
 return (
   <Container>
     <form onSubmit={handleSubmit}>
       <Grid container spacing={3}>
-        {/* 氏名 */}
         <Grid item xs={12}>
-          <Typography variant="h6" component="div">氏名</Typography>
-          <TextField name="name" onChange={handleTextInputChange} required fullWidth />
+          <TextField
+            name="nickname"
+            label="呼んでほしい名前"
+            value={formState.nickname}
+            onChange={handleTextInputChange}
+            required
+            fullWidth
+          />
         </Grid>
 
-        {/* 性別 */}
         <Grid item xs={12}>
-          <Typography variant="h6" component="div">性別</Typography>
-          <TextField name="gender" onChange={handleTextInputChange} required fullWidth />
+          <FormControl fullWidth>
+            <InputLabel>現状</InputLabel>
+            <Select
+              name="currentStatus"
+              value={formState.currentStatus}
+              onChange={handleSelectInputChange}
+              label="現状"
+              required
+            >
+              <MenuItem value="会社経営">会社経営</MenuItem>
+              <MenuItem value="個人事業主">個人事業主</MenuItem>
+              <MenuItem value="副業">副業</MenuItem>
+              <MenuItem value="会社員">会社員</MenuItem>
+              <MenuItem value="公務員">公務員</MenuItem>
+              <MenuItem value="専業主婦">専業主婦（夫）</MenuItem>
+              <MenuItem value="学生">学生</MenuItem>
+              <MenuItem value="その他">その他</MenuItem>
+            </Select>
+          </FormControl>
         </Grid>
 
-        {/* 年齢 */}
-        <Grid item xs={12}>
-          <Typography variant="h6" component="div">年齢</Typography>
-          <TextField name="age" onChange={handleTextInputChange} required fullWidth />
-        </Grid>
+        {formState.currentStatus === "会社経営" && (
+          <>
+            <Grid item xs={12}>
+              <TextField
+                name="businessContent"
+                label="事業内容"
+                value={formState.businessContent}
+                onChange={handleTextInputChange}
+                required
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                name="annualRevenue"
+                label="年商"
+                value={formState.annualRevenue}
+                onChange={handleTextInputChange}
+                required
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                name="employeeNumber"
+                label="従業員数"
+                value={formState.employeeNumber}
+                onChange={handleTextInputChange}
+                required
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                name="businessStartDate"
+                label="開業時期"
+                value={formState.businessStartDate}
+                onChange={handleTextInputChange}
+                required
+                fullWidth
+              />
+            </Grid>
+          </>
+        )}
 
-        {/* 事業内容 */}
-        <Grid item xs={12}>
-          <Typography variant="h6" component="div">事業内容</Typography>
-          <TextField name="businessContent" onChange={handleTextInputChange} required fullWidth />
-        </Grid>
+        {formState.currentStatus === "個人事業主" && (
+          <>
+            <Grid item xs={12}>
+              <TextField
+                name="businessContent"
+                label="事業内容"
+                value={formState.businessContent}
+                onChange={handleTextInputChange}
+                required
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                name="annualRevenue"
+                label="年商"
+                value={formState.annualRevenue}
+                onChange={handleTextInputChange}
+                required
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                name="businessStartDate"
+                label="開業時期"
+                value={formState.businessStartDate}
+                onChange={handleTextInputChange}
+                required
+                fullWidth
+              />
+            </Grid>
+          </>
+        )}
 
-        {/* 事業規模 */}
-        <Grid item xs={12}>
-          <Typography variant="h6" component="div">事業規模 (年商/利益)</Typography>
-          <TextField name="businessScale" onChange={handleTextInputChange} required fullWidth />
-        </Grid>
+        {formState.currentStatus === "副業" && (
+          <>
+            <Grid item xs={12}>
+              <TextField
+                name="businessContent"
+                label="事業内容"
+                value={formState.businessContent}
+                onChange={handleTextInputChange}
+                required
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                name="annualRevenue"
+                label="年商"
+                value={formState.annualRevenue}
+                onChange={handleTextInputChange}
+                required
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                name="mainJobIncome"
+                label="本業収入"
+                value={formState.mainJobIncome}
+                onChange={handleTextInputChange}
+                required
+                fullWidth
+              />
+            </Grid>
+          </>
+        )}
 
-        {/* 従業員数 */}
-        <Grid item xs={12}>
-          <Typography variant="h6" component="div">従業員数</Typography>
-          <TextField name="employeeNumber" onChange={handleTextInputChange} required fullWidth />
-        </Grid>
+        {["会社員", "公務員"].includes(formState.currentStatus) && (
+          <>
+            <Grid item xs={12}>
+              <TextField
+                name="occupation"
+                label="職業"
+                value={formState.occupation}
+                onChange={handleTextInputChange}
+                required
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                name="annualIncome"
+                label="年収"
+                value={formState.annualIncome}
+                onChange={handleTextInputChange}
+                required
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                name="specialSkill"
+                label="得意（特異）なこと"
+                value={formState.specialSkill}
+                onChange={handleTextInputChange}
+                required
+                fullWidth
+              />
+            </Grid>
+          </>
+        )}
 
-        {/* 事業開始時期 */}
-        <Grid item xs={12}>
-          <Typography variant="h6" component="div">事業開始時期</Typography>
-          <TextField name="businessStartDate" onChange={handleTextInputChange} required fullWidth />
-        </Grid>
+        {["専業主婦", "学生"].includes(formState.currentStatus) && (
+          <Grid item xs={12}>
+            <TextField
+              name="specialSkill"
+              label="得意（特異）なこと"
+              value={formState.specialSkill}
+              onChange={handleTextInputChange}
+              required
+              fullWidth
+            />
+          </Grid>
+        )}
 
-        {/* 送信ボタン */}
         <Grid item xs={12}>
           <Button type="submit" variant="contained" color="primary" fullWidth>送信</Button>
         </Grid>
       </Grid>
     </form>
-
-    {/* エラーメッセージ */}
-    {errors.length > 0 && (
-      <ul>
-        {errors.map((error, index) => <li key={index}>{error}</li>)}
-      </ul>
-    )}
   </Container>
 );
 };
